@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using APICatalogo.Context;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
@@ -5,8 +6,12 @@ using MySqlConnector;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers()  // Resolvendo problema de referência ciclica com serialização
+    .AddJsonOptions(options =>
+       options.JsonSerializerOptions
+         .ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

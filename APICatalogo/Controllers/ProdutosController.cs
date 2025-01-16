@@ -3,6 +3,7 @@ using APICatalogo.Context;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
 {
@@ -20,7 +21,7 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Produto>> Get()
         {
-           var produtos = _contex.Produtos.ToList();
+           var produtos = _contex.Produtos.AsNoTracking().ToList();
             if (produtos is null)
             {
                 return NotFound("Produtos Não encontrados");
