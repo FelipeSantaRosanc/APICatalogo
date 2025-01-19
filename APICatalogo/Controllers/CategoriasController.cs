@@ -1,4 +1,5 @@
 ﻿using APICatalogo.Context;
+using APICatalogo.Extensions.Filters;
 using APICatalogo.Model;
 using APICatalogo.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -6,73 +7,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
 {
-    [Route("[controller]")]
-    [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly AppDbContext _contex;
-        private readonly IConfiguration _configuration;
+        private readonly AppDbContext _context;
+        private readonly ILogger<CategoriasController> _logger;
 
-        public CategoriasController(AppDbContext contex, IConfiguration configuration)
+        public CategoriasController(AppDbContext context, ILogger<CategoriasController> logger)
         {
-            _contex = contex;
-            _configuration = configuration;
+            _context = context;
+            _logger = logger;
         }
-
-        [HttpGet("LerArquivoConfiguracao")]
-        public string GetValores()
-        {
-            var valor1 = _configuration["chave1"];
-            var valor2 = _configuration["chave2"];
-
-            var secao1 = _configuration["secao1:chave2"];
-
-            return $"chave1: {valor1} | chave2: {valor2} | secao1:chave2: {secao1}";
-
-
-        }
-
-            [HttpGet("UsandoFromServices/{nome}")]
-        public ActionResult<String> GetSaudacaoFromService([FromServices] IMeuServico meuservico,
-                                                                        string nome)
-        {
-            return meuservico.Saudacao(nome);
-        }
-
-
-        [HttpGet("UsandoSemFromServices/{nome}")]
-        public ActionResult<String> GetSaudacaoSemFromService(IMeuServico meuservico,
-                                                                        string nome)
-        {
-            return meuservico.Saudacao(nome);
-        }
-
-
-        [HttpGet("Produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
-        {
-            // return _contex.Categorias.Include(p => p.Produtos).AsNoTracking().ToList(); //incluir produtos da categoria
-            return _contex.Categorias.Include(p => p.Produtos).Where(c => c.CategoriaId <= 5). ToList(); //incluir produtos da categoria e restringir somente a a id's menores que 5
-        }
-
-
 
         [HttpGet]
-        public ActionResult<IEnumerable<Categoria>> Get()
+        public async Task<ActionResult<IEnumerable<Categoria>>> Get()
         {
-
-            return _contex.Categorias.AsNoTracking().ToList();  //AsNoTracking() não rastreia as entidades e melhora a performance somente no Get
+            return await _context.Categorias.AsNoTracking().ToListAsync();
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
-            //throw new Exception("Exception ao retornar a categoria pelo id");
+            var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
 
-            var categoria = _contex.Categorias.FirstOrDefault(p => p.CategoriaId == id);
-            if (categoria is null)
+            if (categoria == null)
             {
-                return NotFound("Categoria não encontrada");
+                _logger.LogWarning($"Categoria com id= {id} não encontrada...");
+                return NotFound($"Categoria com id= {id} não encontrada...");
             }
             return Ok(categoria);
         }
@@ -82,14 +42,14 @@ namespace APICatalogo.Controllers
         {
             if (categoria is null)
             {
-                return BadRequest("Categoria não encontrada");
+                _logger.LogWarning($"Dados inválidos...");
+                return BadRequest("Dados inválidos");
             }
 
-            _contex.Categorias.Add(categoria);
-            _contex.SaveChanges();
+            _context.Categorias.Add(categoria);
+            _context.SaveChanges();
 
             return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
-
         }
 
         [HttpPut("{id:int}")]
@@ -97,32 +57,29 @@ namespace APICatalogo.Controllers
         {
             if (id != categoria.CategoriaId)
             {
-                return BadRequest($"Categoria com id={id} não encontrada");
+                _logger.LogWarning($"Dados inválidos...");
+                return BadRequest("Dados inválidos");
             }
 
-            _contex.Entry(categoria).State = EntityState.Modified;
-            _contex.SaveChanges();
+            _context.Entry(categoria).State = EntityState.Modified;
+            _context.SaveChanges();
             return Ok(categoria);
         }
-
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var categoria = _contex.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+            var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
 
             if (categoria == null)
             {
-                return NotFound("Categoria não encontrada");
-            }
-            else
-            {
-                _contex.Categorias.Remove(categoria);
-                _contex.SaveChanges();
-                return Ok(categoria);
+                _logger.LogWarning($"Categoria com id={id} não encontrada...");
+                return NotFound($"Categoria com id={id} não encontrada...");
             }
 
+            _context.Categorias.Remove(categoria);
+            _context.SaveChanges();
+            return Ok(categoria);
         }
-
     }
 }
