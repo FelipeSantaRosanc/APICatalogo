@@ -67,6 +67,8 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
+            //throw new Exception("Exception ao retornar a categoria pelo id");
+
             var categoria = _contex.Categorias.FirstOrDefault(p => p.CategoriaId == id);
             if (categoria is null)
             {
