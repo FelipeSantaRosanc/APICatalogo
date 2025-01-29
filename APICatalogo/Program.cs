@@ -1,47 +1,37 @@
-using System.Text.Json.Serialization;
 using APICatalogo.Context;
-using APICatalogo.Extensions;
-using APICatalogo.Extensions.Filters;
-using APICatalogo.Services;
-using Microsoft.AspNetCore.Mvc;
+using APICatalogo.Filters;
+using APICatalogo.Logging;
+using APICatalogo.Repositories;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(typeof(ApiExceptionFilter));
-})
-.AddJsonOptions(options =>
-{
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-});
+builder.Services.AddControllers()
+      .AddJsonOptions(options =>
+         options.JsonSerializerOptions
+            .ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
-/*var valor1 = builder.Configuration["chave1"];
-var valor2 = builder.Configuration["secao1:chave2"];*/
-
 builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseMySql(mySqlConnection,
+                    ServerVersion.AutoDetect(mySqlConnection)));
 
-    options.UseMySql(mySqlConnection,
-    ServerVersion.AutoDetect(mySqlConnection)));
+builder.Services.AddScoped<ApiLoggingFilter>();
 
-builder.Services.AddTransient<IMeuServico, MeuServico>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 
-builder.Services.Configure<ApiBehaviorOptions> (options => 
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
 {
-    options.DisableImplicitFromServicesParameters = true;
-
-});
-
+    LogLevel = LogLevel.Information
+}));
 
 var app = builder.Build();
 
@@ -50,30 +40,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.ConfigureExceptionHandler();
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
 app.UseAuthorization();
-
-/*app.Use(async (context, next) =>
-    {
-        //Adicionar o codigo antes do request
-        await next(context);
-        //adicionar o codigo depois do request
-
-
-    });*/
-
 app.MapControllers();
-
-/*//adicionando middeware terminal dentro do request
-app.Run(async (context) =>
-{
-    await context.Response.WriteAsync("Middeware Final");
-});*/
-
 app.Run();
