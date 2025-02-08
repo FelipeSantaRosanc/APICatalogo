@@ -17,7 +17,7 @@ namespace APICatalogo.Repositories
 
         public IEnumerable<T> GetAll()
         {
-           return _context.Set<T>().ToList();
+           return _context.Set<T>().AsNoTracking().ToList();
 
         }
 
@@ -29,8 +29,8 @@ namespace APICatalogo.Repositories
 
         public T Create(T entity)
         {
-            _context.Set<T>().Add(entity);
-            _context.SaveChanges();
+            // _context.Set<T>().Add(entity);
+            // _context.SaveChanges();
             return entity;
         }
 
@@ -38,14 +38,14 @@ namespace APICatalogo.Repositories
         {
             _context.Set<T>().Update(entity);
             //_context.Entry(entity).State = EntityState.Modified;  Explicitar que o objeto foi modificado
-            _context.SaveChanges();
+            // _context.SaveChanges();
             return entity;
         }
 
         public T Delete(T entity)
         {
-            _context.Set<T>().Remove(entity);
-            _context.SaveChanges();
+            //  _context.Set<T>().Remove(entity);
+            // _context.SaveChanges();
             return entity;
         }
 
