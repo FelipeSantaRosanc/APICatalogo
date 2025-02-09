@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using APICatalogo.Models;
 
 
-namespace APICatalogo.Model
+namespace APICatalogo.Models
 {
 
     [Table("Categorias")]

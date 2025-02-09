@@ -8,11 +8,11 @@ namespace APICatalogo.DTOs
 
         [Required]  //Data anotation 
         [StringLength(80)]
-        public string? Nome { get; set; }
+        public string Nome { get; set; }
 
         [Required]
         [StringLength(300)] //Data anotation 
-        public string? ImagemUrl { get; set; }
+        public string ImagemUrl { get; set; }
 
     }
 }

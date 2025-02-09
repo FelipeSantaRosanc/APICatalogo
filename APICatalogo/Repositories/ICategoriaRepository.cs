@@ -1,4 +1,4 @@
-﻿using APICatalogo.Model;
+﻿using APICatalogo.Models;
 
 namespace APICatalogo.Repositories
 {
