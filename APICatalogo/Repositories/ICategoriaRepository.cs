@@ -6,6 +6,7 @@ namespace APICatalogo.Repositories
     public interface ICategoriaRepository : IRepository<Categoria>
     {
         PagedList<Categoria> GetCategorias(CategoriaParameters categoriaParams);
+        PagedList<Categoria> GetCategoriasFiltroNome(CategoriasFiltroNome categoriaParams);
 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using APICatalogo.DTOs;
 using APICatalogo.DTOs.Mappings;
+using APICatalogo.Models;
 using APICatalogo.Pagination;
 using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +40,19 @@ public class CategoriasController : ControllerBase
     public ActionResult<IEnumerable<CategoriaDTO>> Get([FromQuery] CategoriaParameters categoriaParameters)
     {
         var categorias = _uof.CategoriaRepository.GetCategorias(categoriaParameters);
+        return ObterCategorias(categorias);
+    }
+
+    [HttpGet("filter/nome/pagination")]
+    public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasFiltradas([FromQuery] CategoriasFiltroNome categoriaFiltroParams)
+    {
+        var categoriasFiltradas = _uof.CategoriaRepository.GetCategoriasFiltroNome(categoriaFiltroParams);
+
+        return ObterCategorias(categoriasFiltradas);
+    }
+
+    private ActionResult<IEnumerable<CategoriaDTO>> ObterCategorias(PagedList<Categoria> categorias)
+    {
         var metaData = new
         {
             categorias.TotalCount,
@@ -53,9 +67,9 @@ public class CategoriasController : ControllerBase
 
         var categoriasDto = categorias.ToCategoriaDTOList();
         return Ok(categoriasDto);
-
-
     }
+
+    
 
 
 

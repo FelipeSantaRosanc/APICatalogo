@@ -27,6 +27,20 @@ namespace APICatalogo.Controllers
         public ActionResult<IEnumerable<ProdutoDTO>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
             var produtos = _uof.ProdutoRepository.GetProdutosPorPreco(produtosParameters);
+            return ObterProdutos(produtos);
+        }
+
+
+        [HttpGet("filter/preco/pagination")]
+        public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosFilterPreco([FromQuery] ProdutosFiltroPreco produtosFilterParams)
+        {
+            var produtos = _uof.ProdutoRepository.GetProdutosFiltroPreco(produtosFilterParams);
+            return ObterProdutos(produtos);
+        }
+
+
+        private ActionResult<IEnumerable<ProdutoDTO>> ObterProdutos(PagedList<Produto> produtos)
+        {
             var metaData = new
             {
                 produtos.TotalCount,
@@ -41,7 +55,9 @@ namespace APICatalogo.Controllers
 
             var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
             return Ok(produtosDto);
-        } 
+        }
+
+
 
         [HttpGet("produtos/{id}")]
         public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosCategoria(int id)
